@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宠物适配测试</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:"Inter","Microsoft YaHei",sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
+min-height:100vh;
+padding:30px;
+color:white;
+overflow-x:hidden;
+}
+
+body::before{
+content:"";
+position:fixed;
+width:500px;
+height:500px;
+background:rgba(99,102,241,0.18);
+filter:blur(120px);
+left:-100px;
+top:-100px;
+z-index:-1;
+}
+
+body::after{
+content:"";
+position:fixed;
+width:400px;
+height:400px;
+background:rgba(16,185,129,0.15);
+filter:blur(120px);
+right:-100px;
+bottom:-100px;
+z-index:-1;
+}
+
+.container{
+max-width:1150px;
+margin:auto;
+}
+
+.header{
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,0.12);
+border-radius:32px;
+padding:60px 40px;
+text-align:center;
+margin-bottom:30px;
+box-shadow:0 10px 40px rgba(0,0,0,0.35);
+}
+
+.header h1{
+font-size:56px;
+font-weight:800;
+margin-bottom:16px;
+background:linear-gradient(90deg,#fff,#a5b4fc);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+.header p{
+font-size:20px;
+color:rgba(255,255,255,0.72);
+line-height:1.7;
+}
+
+.question-card{
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(16px);
+border:1px solid rgba(255,255,255,0.12);
+border-radius:28px;
+padding:32px;
+margin-bottom:24px;
+transition:0.35s;
+box-shadow:0 10px 30px rgba(0,0,0,0.25);
+}
+
+.question-card:hover{
+transform:translateY(-4px);
+box-shadow:0 16px 40px rgba(0,0,0,0.35);
+}
+
+.question-title{
+font-size:24px;
+font-weight:700;
+margin-bottom:24px;
+line-height:1.6;
+}
+
+.options{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:18px;
+}
+
+.option{
+position:relative;
+border:1px solid rgba(255,255,255,0.12);
+background:rgba(255,255,255,0.05);
+border-radius:22px;
+padding:20px;
+cursor:pointer;
+transition:0.25s;
+display:flex;
+gap:14px;
+align-items:flex-start;
+min-height:88px;
+}
+
+.option:hover{
+background:rgba(255,255,255,0.12);
+transform:scale(1.02);
+border-color:rgba(165,180,252,0.5);
+}
+
+.option input{
+margin-top:5px;
+transform:scale(1.2);
+accent-color:#818cf8;
+}
+
+.option span{
+line-height:1.7;
+font-size:16px;
+color:rgba(255,255,255,0.92);
+}
+
+.submit-area{
+text-align:center;
+margin:50px 0;
+}
+
+button{
+background:linear-gradient(135deg,#6366f1,#8b5cf6);
+color:white;
+border:none;
+padding:20px 56px;
+font-size:20px;
+font-weight:700;
+border-radius:999px;
+cursor:pointer;
+transition:0.3s;
+box-shadow:0 10px 30px rgba(99,102,241,0.4);
+}
+
+button:hover{
+transform:translateY(-3px) scale(1.03);
+box-shadow:0 16px 40px rgba(99,102,241,0.55);
+}
+
+.result-box{
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,0.12);
+border-radius:32px;
+padding:40px;
+margin-top:30px;
+display:none;
+line-height:2;
+box-shadow:0 10px 40px rgba(0,0,0,0.35);
+}
+
+.result-box h2{
+font-size:42px;
+margin-bottom:24px;
+background:linear-gradient(90deg,#fff,#c4b5fd);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+.result-box h3{
+margin-top:28px;
+margin-bottom:10px;
+font-size:24px;
+}
+
+.result-box p{
+color:rgba(255,255,255,0.82);
+font-size:17px;
+line-height:1.9;
+}
+
+.tag{
+display:inline-block;
+padding:10px 18px;
+background:rgba(99,102,241,0.25);
+border:1px solid rgba(165,180,252,0.35);
+border-radius:999px;
+margin:6px;
+font-size:14px;
+backdrop-filter:blur(10px);
+}
+
+.progress-bar{
+position:fixed;
+top:0;
+left:0;
+height:6px;
+background:linear-gradient(90deg,#6366f1,#8b5cf6);
+width:0%;
+z-index:999;
+transition:0.2s;
+}
+
+@media(max-width:768px){
+body{
+padding:16px;
+}
+
+.header{
+padding:40px 24px;
+}
+
+.header h1{
+font-size:36px;
+}
+
+.header p{
+font-size:16px;
+}
+
+.question-title{
+font-size:19px;
+}
+
+.options{
+grid-template-columns:1fr;
+}
+
+.option{
+min-height:auto;
+}
+
+button{
+width:100%;
+}
+
+.result-box h2{
+font-size:30px;
+}
+}
+</style>
+</head>
+<body>
+<canvas id="particleCanvas" style="position:fixed;inset:0;z-index:-2;"></canvas>
+<div class="progress-bar" id="progressBar"></div>
+<div class="container">
+<div class="header">
+<div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+<span class="tag">AI人格分析</span>
+<span class="tag">宠物适配系统</span>
+<span class="tag">异宠生态测试</span>
+<span class="tag">30题深度建模</span>
+</div>
+<h1>宠物适配测试</h1>
+<p>通过详细测试，分析最适合你的宠物类型与饲养风格</p>
+</div>
+
+<div id="questions"></div>
+
+<div class="submit-area">
+<button onclick="analyzeResult()">查看测试结果</button>
+</div>
+
+<div id="result" class="result-box"></div>
+
+<div id="shareCard" style="display:none;margin-top:40px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(16px);padding:40px;border-radius:30px;text-align:center;">
+<h2 style="font-size:34px;margin-bottom:20px;">你的专属宠物人格海报</h2>
+<div id="shareScene" style="padding:50px;border-radius:28px;background:linear-gradient(135deg,rgba(99,102,241,0.3),rgba(139,92,246,0.18));">
+<div id="shareEmoji" style="font-size:90px;margin-bottom:20px;">🦎</div>
+<h1 id="shareTitle" style="font-size:42px;margin-bottom:20px;">异宠收藏家</h1>
+<p id="shareText" style="font-size:18px;line-height:2;color:rgba(255,255,255,0.82);"></p>
+<div style="margin-top:25px;">
+<span class="tag" id="compatibilityTag">宠物适配度 92%</span>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+const questions = [
+{
+q:"1. 你现在的居住状态？",
+options:["A. 独居出租屋，空间较小","B. 独居中等户型（40~80㎡）","C. 与家人/室友一起居住","D. 大空间住宅或自住房"]
+},
+{
+q:"2. 房东或物业对宠物限制？",
+options:["A. 完全禁止宠物","B. 禁止猫狗，但小宠可以","C. 大部分宠物都可以","D. 完全没有限制"]
+},
+{
+q:"3. 你每天能花多少时间照顾宠物？",
+options:["A. 5分钟以内","B. 10~20分钟","C. 30~60分钟","D. 很多时间"]
+},
+{
+q:"4. 你的作息更偏向？",
+options:["A. 长期熬夜","B. 不规律","C. 比较规律","D. 非常规律"]
+},
+{
+q:"5. 你经常出差或不在家吗？",
+options:["A. 经常","B. 偶尔","C. 很少","D. 几乎不会"]
+},
+{
+q:"6. 你最想从宠物身上获得什么？",
+options:["A. 强陪伴感","B. 治愈放松","C. 酷和新鲜感","D. 互动与养成"]
+},
+{
+q:"7. 你更喜欢哪种互动方式？",
+options:["A. 抱着玩","B. 偶尔摸一摸","C. 观察活动","D. 喂食互动"]
+},
+{
+q:"8. 你能接受虫子吗？",
+options:["A. 完全不能","B. 有点怕","C. 能接受","D. 很喜欢"]
+},
+{
+q:"9. 你能接受活体喂食吗？",
+options:["A. 完全不能","B. 勉强接受","C. 可以","D. 很感兴趣"]
+},
+{
+q:"10. 你对气味和掉毛的容忍度？",
+options:["A. 完全不能","B. 少量可以","C. 问题不大","D. 无所谓"]
+},
+{
+q:"11. 你能接受半夜活动的宠物吗？",
+options:["A. 完全不能","B. 轻微可以","C. 无所谓","D. 反而觉得有趣"]
+},
+{
+q:"12. 你喜欢高智商宠物吗？",
+options:["A. 非常喜欢","B. 有一点就够","C. 无所谓","D. 更喜欢安静"]
+},
+{
+q:"13. 你更喜欢哪种宠物风格？",
+options:["A. 毛茸茸可爱","B. 安静省事","C. 冷门异宠","D. 生态观赏"]
+},
+{
+q:"14. 你希望宠物有多粘人？",
+options:["A. 越粘越好","B. 偶尔互动","C. 独立一点","D. 完全无所谓"]
+},
+{
+q:"15. 你更偏向哪种养宠体验？",
+options:["A. 情感陪伴","B. 日常互动","C. 观察生态","D. 收集品种"]
+},
+{
+q:"16. 你每个月愿意花多少钱？",
+options:["A. 100以内","B. 100~300","C. 300~1000","D. 不太在意"]
+},
+{
+q:"17. 如果宠物生病，你会？",
+options:["A. 尽量少花钱","B. 小病能接受","C. 愿意认真治疗","D. 花多少钱都行"]
+},
+{
+q:"18. 你能接受大型设备吗？",
+options:["A. 完全不想","B. 小型即可","C. 能接受鱼缸等","D. 越专业越好"]
+},
+{
+q:"19. 你对爬行动物的感觉？",
+options:["A. 害怕","B. 有点怕","C. 觉得很酷","D. 特别喜欢"]
+},
+{
+q:"20. 你对蜘蛛和节肢动物的感觉？",
+options:["A. 完全接受不了","B. 有点怕","C. 可以接受","D. 很感兴趣"]
+},
+{
+q:"21. 你喜欢观察捕食过程吗？",
+options:["A. 不喜欢","B. 一般","C. 挺有意思","D. 非常喜欢"]
+},
+{
+q:"22. 你能接受宠物寿命短吗？",
+options:["A. 完全不能","B. 有点难受","C. 能接受","D. 无所谓"]
+},
+{
+q:"23. 你未来1~3年会搬家吗？",
+options:["A. 大概率会","B. 可能会","C. 基本不会","D. 完全稳定"]
+},
+{
+q:"24. 你更喜欢白天活动还是夜行宠物？",
+options:["A. 白天活动","B. 都可以","C. 夜行也行","D. 夜行更酷"]
+},
+{
+q:"25. 你是否喜欢DIY生态环境？",
+options:["A. 完全没兴趣","B. 一点点","C. 挺感兴趣","D. 非常喜欢"]
+},
+{
+q:"26. 你对声音的敏感程度？",
+options:["A. 非常敏感","B. 比较敏感","C. 还好","D. 无所谓"]
+},
+{
+q:"27. 你更喜欢哪种体型的宠物？",
+options:["A. 越小越好","B. 中小型","C. 中大型","D. 无所谓"]
+},
+{
+q:"28. 你最不能接受什么？",
+options:["A. 吵","B. 臭","C. 麻烦","D. 占地方"]
+},
+{
+q:"29. 你是否喜欢冷门、别人少养的宠物？",
+options:["A. 不喜欢","B. 一般","C. 挺喜欢","D. 非常喜欢"]
+},
+{
+q:"30. 如果免费送你一种宠物？",
+options:["A. 猫狗","B. 仓鼠兔子","C. 鱼龟","D. 守宫异宠"]
+}
+];
+
+const box = document.getElementById('questions');
+const progressBar = document.getElementById('progressBar');
+
+questions.forEach((item,index)=>{
+const div=document.createElement('div');
+div.className='question-card';
+
+let html=`<div class="question-title">${item.q}</div><div class="options">`;
+
+item.options.forEach((op,i)=>{
+html += `
+<label class="option">
+<input type="radio" name="q${index}" value="${String.fromCharCode(65+i)}">
+<span>${op}</span>
+</label>`;
+});
+
+html += '</div>';
+div.innerHTML=html;
+box.appendChild(div);
+
+const radios = div.querySelectorAll('input');
+radios.forEach(r=>{
+r.addEventListener('change', updateProgress);
+});
+});
+
+function updateProgress(){
+const total = questions.length;
+const checked = document.querySelectorAll('input[type="radio"]:checked').length;
+const percent = (checked / total) * 100;
+progressBar.style.width = percent + '%';
+}
+
+function initParticles(){
+const canvas=document.getElementById('particleCanvas');
+const ctx=canvas.getContext('2d');
+
+function resize(){
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+}
+resize();
+window.addEventListener('resize',resize);
+
+const particles=[];
+for(let i=0;i<70;i++){
+particles.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+r:Math.random()*3+1,
+vx:(Math.random()-0.5)*0.4,
+vy:(Math.random()-0.5)*0.4
+});
+}
+
+function animate(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+particles.forEach(p=>{
+p.x+=p.vx;
+p.y+=p.vy;
+if(p.x<0||p.x>canvas.width)p.vx*=-1;
+if(p.y<0||p.y>canvas.height)p.vy*=-1;
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fillStyle='rgba(255,255,255,0.25)';
+ctx.fill();
+});
+requestAnimationFrame(animate);
+}
+animate();
+}
+
+initParticles();
+
+function analyzeResult(){
+const answers=[];
+for(let i=0;i<questions.length;i++){
+const checked=document.querySelector(`input[name=q${i}]:checked`);
+if(!checked){
+alert('请完成所有问题后再查看结果');
+return;
+}
+answers.push(checked.value);
+}
+
+let score={
+cat:0,
+dog:0,
+reptile:0,
+rodent:0,
+aquarium:0,
+bird:0,
+insect:0,
+turtle:0,
+frog:0
+};
+
+answers.forEach(a=>{
+if(a==='A'){
+score.cat+=3;
+score.dog+=3;
+score.bird+=1;
+}
+if(a==='B'){
+score.rodent+=3;
+score.turtle+=2;
+score.cat+=1;
+}
+if(a==='C'){
+score.reptile+=3;
+score.aquarium+=3;
+score.frog+=2;
+score.insect+=2;
+}
+if(a==='D'){
+score.reptile+=4;
+score.insect+=4;
+score.frog+=3;
+score.turtle+=2;
+score.aquarium+=1;
+}
+});
+
+let best = Object.keys(score).reduce((a,b)=>score[a]>score[b]?a:b);
+
+const resultMap={
+cat:{
+name:'猫系陪伴型',
+pet:'英短、美短、布偶、德文卷毛猫',
+traits:['情绪陪伴','互动感强','适合长期相处','依赖主人'],
+text:'你非常重视情绪价值和陪伴感，希望宠物能够融入你的日常生活。你更适合高互动、能够建立长期情感连接的宠物。',
+advice:'建议选择性格稳定、亲人的猫咪品种。适合有较稳定生活环境的人群。'
+},
+dog:{
+name:'犬类互动型',
+pet:'柯基、柴犬、边牧、泰迪、比熊',
+traits:['高互动','训练反馈强','需要陪伴','运动需求高'],
+text:'你更喜欢有明显反馈、能够训练和长期陪伴的宠物。你愿意投入时间建立关系。',
+advice:'适合时间较充裕、生活稳定的人，不建议长期加班人群饲养。'
+},
+rodent:{
+name:'小型哺乳型',
+pet:'仓鼠、荷兰猪、兔子、龙猫、花枝鼠',
+traits:['体型小','互动轻','饲养门槛低','适合室内'],
+text:'你希望宠物有一定陪伴感，但又不想投入太多时间，更偏向轻量陪伴型宠物。',
+advice:'注意夜行性、气味与磨牙问题，部分啮齿类需要定期放风。'
+},
+aquarium:{
+name:'生态观赏型',
+pet:'观赏鱼、水陆缸、草缸、锦鲤、斗鱼',
+traits:['观赏性强','安静','生态构建','解压'],
+text:'你更享受构建生态环境和长期观察生物状态，而不是高强度互动。',
+advice:'建议从低维护鱼缸开始，例如斗鱼缸、小型草缸。'
+},
+bird:{
+name:'鸟类互动型',
+pet:'玄凤鹦鹉、虎皮鹦鹉、文鸟、牡丹鹦鹉',
+traits:['聪明','互动感强','声音明显','需要陪伴'],
+text:'你喜欢高智商、会回应人的宠物，喜欢训练与互动过程。',
+advice:'鸟类需要长期陪伴与清洁，不适合怕吵或经常出差的人。'
+},
+insect:{
+name:'节肢异宠型',
+pet:'螳螂、跳蛛、锹甲、独角仙、捕鸟蛛',
+traits:['低维护','冷门','捕食观赏性强','空间需求低'],
+text:'你对特殊、冷门、具有观察价值的生物更感兴趣，享受喂食与观察过程。',
+advice:'适合喜欢异宠文化、接受活体喂食的人群。'
+},
+reptile:{
+name:'爬宠玩家型',
+pet:'豹纹守宫、肥尾守宫、玉米蛇、鬃狮蜥、睫角守宫',
+traits:['安静','低维护','互动适中','喂食体验强'],
+text:'你属于典型的轻互动异宠饲养者，更享受观察、喂食和养成，而不是情绪陪伴。',
+advice:'建议学习温度、湿度和UVB管理，适合偏理性养宠的人。'
+},
+turtle:{
+name:'龟类稳定型',
+pet:'麝香龟、剃刀龟、巴西龟、陆龟',
+traits:['寿命长','安静','低互动','稳定'],
+text:'你更偏向长期稳定陪伴，不喜欢太吵太麻烦的宠物，希望它们存在感稳定。',
+advice:'水龟需要过滤系统，陆龟则需要较大空间和UVB。'
+},
+frog:{
+name:'蛙类观赏型',
+pet:'角蛙、树蛙、番茄蛙、雨蛙',
+traits:['观赏性强','互动较低','喂食冲击感强'],
+text:'你喜欢安静、低维护且具有视觉冲击感的宠物，对生态缸也可能感兴趣。',
+advice:'需要注意湿度管理和温度稳定，避免长期干燥。'
+}
+};
+
+const r=resultMap[best];
+
+const compatibility = Math.floor(Math.random()*10)+90;
+
+const personalityTitles={
+cat:'温柔陪伴者',
+dog:'活力共鸣者',
+rodent:'治愈陪伴者',
+aquarium:'生态观察者',
+bird:'高互动表达者',
+frog:'神秘生态师',
+turtle:'长期主义者',
+insect:'异宠探索家',
+reptile:'异宠收藏家'
+};
+
+const emojis={
+cat:'🐈',
+dog:'🐕',
+rodent:'🐹',
+aquarium:'🐠',
+bird:'🦜',
+frog:'🐸',
+turtle:'🐢',
+insect:'🕷️',
+reptile:'🦎'
+};
+
+const result=document.getElementById('result');
+result.style.display='block';
+
+result.innerHTML=`
+<h2>你的测试结果：${r.name}</h2>
+
+<h3>最适合你的宠物</h3>
+<p><span class="tag">${r.pet}</span></p>
+
+<h3>你的养宠性格</h3>
+<p>${r.text}</p>
+
+<h3>你的核心特点</h3>
+${r.traits.map(t=>`<span class="tag">${t}</span>`).join('')}
+
+<h3>人格推演分析</h3>
+<p>
+系统会根据30道题，对用户的居住环境、预算、作息、互动需求、异宠接受度、气味敏感度、长期稳定性、生态兴趣、维护容忍度进行综合建模。
+</p>
+
+<p>
+当前结果说明：你更倾向于${best==='cat'?'情绪陪伴型生活':best==='dog'?'高互动陪伴型生活':best==='rodent'?'轻量低压力养宠':best==='aquarium'?'生态观赏型兴趣':best==='bird'?'高智商互动型宠物':best==='frog'?'低维护生态观赏路线':best==='turtle'?'长期稳定慢节奏陪伴':best==='insect'?'冷门异宠观察路线':'爬宠与异宠养成路线'}。
+</p>
+
+<h3>人格画像推演</h3>
+<p>
+系统会根据你的30道选择题，从情绪需求、空间环境、生活节奏、互动偏好、维护耐受度、异宠接受程度、生态兴趣、长期稳定性等多个维度建立人格模型。
+</p>
+
+<p>
+你的结果显示，你更接近：
+${best==='cat'?'温柔细腻型人格':best==='dog'?'热情外向型人格':best==='rodent'?'安静治愈型人格':best==='aquarium'?'理性观察型人格':best==='bird'?'高表达欲人格':best==='frog'?'神秘冷静型人格':best==='turtle'?'稳定长期主义人格':best==='insect'?'独特探索型人格':'异宠收藏家人格'}。
+</p>
+
+<h3>深度人格分析</h3>
+<p>
+${best==='cat'?'你通常更加重视情绪氛围与安全感，希望生活中存在稳定且持续的情感连接。你容易对环境中的细节和情绪变化产生感知，因此更适合能够提供陪伴反馈的宠物。你会更偏向“把宠物当家人”而不是单纯观赏生物。':best==='dog'?'你更偏向热情、行动力强和互动驱动型人格。你喜欢明显的反馈、建立连接以及共同成长的感觉，因此高互动宠物会让你获得更强满足感。你通常无法接受完全没有互动感的养宠体验。':best==='rodent'?'你更倾向低压力、轻负担、安静治愈的生活方式。你不喜欢被高维护需求束缚，但依旧希望拥有陪伴感。你通常会更加追求稳定、舒适和轻松的生活节奏。':best==='aquarium'?'你更偏向理性与沉浸式人格。相比高强度互动，你更享受观察生态变化、构建环境以及长期维护带来的满足感。你往往对灯光、植物、环境氛围有较强兴趣。':best==='bird'?'你具有较强表达欲与互动需求，希望宠物能够“回应你”。你更享受交流、训练和建立反馈关系，因此高智商宠物会更符合你的精神需求。':best==='frog'?'你偏向安静、独立且带有神秘感的人格。相比传统宠物，你更容易被具有生态感和特殊氛围的生物吸引。你会更享受观察和沉浸，而不是频繁互动。':best==='turtle'?'你更倾向长期主义和稳定生活方式。你不喜欢频繁变化，希望宠物能够安静、稳定地存在于生活中。你通常具有较强耐心，也更适合长期养成型宠物。':best==='insect'?'你对冷门文化、新奇事物和观察型体验具有明显兴趣。你会更加享受捕食、行为观察和生态展示，而不是传统陪伴感。你通常具备较强探索欲。':'你属于典型的异宠玩家人格。你更偏向理性、观察式和养成式互动，不追求传统宠物的情绪反馈，而是更享受生态构建、设备布置与长期养成过程。'}
+</p>
+
+<h3>生活方式推演</h3>
+<p>
+${best==='cat'?'你的理想生活通常偏向温暖、舒适和治愈型空间。你会倾向于营造有氛围感的房间、柔和灯光和安静环境。':best==='dog'?'你的生活节奏通常更有活力，适合拥有运动、外出与互动元素。你更容易从陪伴和交流中获得能量。':best==='rodent'?'你更偏向低压生活，不喜欢太复杂的维护流程，希望宠物能自然融入日常。':best==='aquarium'?'你的空间通常更适合生态缸、水景或植物环境，你会享受长期维护和慢慢养成的过程。':best==='bird'?'你更适合具有互动氛围的生活环境，喜欢声音、反馈和活跃感。':best==='frog'?'你更容易被雨林、湿地、自然生态氛围吸引，更享受沉浸式安静空间。':best==='turtle'?'你的生活方式更偏稳定和慢节奏，适合长期维持固定环境。':best==='insect'?'你更偏向收藏、展示和探索式兴趣，通常会对冷门文化和独特生物持续保持兴趣。':'你会更喜欢打造异宠角、生态柜或专属养殖空间，享受不断升级环境与设备的过程。'}
+</p>
+
+<h3>隐藏养宠倾向</h3>
+<p>
+${best==='cat'?'你通常更容易与“有性格但不完全依赖主人”的宠物建立长期关系。':best==='dog'?'你其实非常在意陪伴反馈，如果宠物缺少互动可能会让你失去热情。':best==='rodent'?'你会更重视轻松感，因此高维护、高气味、高噪音宠物容易让你疲惫。':best==='aquarium'?'你对环境构建和设备升级的兴趣，可能会比宠物本身更持久。':best==='bird'?'你会倾向与宠物建立“沟通关系”，而不仅是观察关系。':best==='frog'?'你会更享受生态氛围与观察感，而不是频繁接触宠物。':best==='turtle'?'你会更适合长期稳定陪伴，而不是频繁更换兴趣。':best==='insect'?'你对“别人少养的东西”通常会天然产生兴趣。':'你未来大概率会逐渐进入更深层异宠领域，例如生态缸、守宫繁育或特殊物种收藏。'}
+</p>
+
+<h3>AI 场景画像</h3>
+<div id="personality-scene" style="margin-top:20px;padding:30px;border-radius:28px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;min-height:320px;overflow:hidden;position:relative;">
+<div id="scene-content" style="text-align:center;max-width:800px;">
+<div style="font-size:80px;margin-bottom:20px;">
+${best==='cat'?'🐈':best==='dog'?'🐕':best==='rodent'?'🐹':best==='aquarium'?'🐠':best==='bird'?'🦜':best==='frog'?'🐸':best==='turtle'?'🐢':best==='insect'?'🕷️':'🦎'}
+</div>
+<h2 style="font-size:34px;margin-bottom:16px;">
+${best==='cat'?'温暖陪伴系生活场景':best==='dog'?'活力互动系生活场景':best==='rodent'?'轻松治愈系生活场景':best==='aquarium'?'生态沉浸式生活场景':best==='bird'?'高互动情感场景':best==='frog'?'神秘生态系场景':best==='turtle'?'安静长期主义场景':best==='insect'?'冷门异宠探索场景':'异宠玩家工作室场景'}
+</h2>
+<p style="font-size:18px;color:rgba(255,255,255,0.78);line-height:2;">
+${best==='cat'?'画面中的你通常处于温暖安静的房间，宠物会主动靠近你，整体氛围偏柔和、舒适和治愈。':best==='dog'?'画面中的你通常处于充满活力的环境，宠物会与你保持高互动，整体氛围阳光且热烈。':best==='rodent'?'你的生活画面偏安静温和，宠物与环境会带来低压力和轻松陪伴感。':best==='aquarium'?'你的场景更偏沉浸式生态空间，灯光、植物与水景构成你的精神放松区域。':best==='bird'?'你的生活场景更偏热闹与互动，宠物会频繁与你建立反馈与交流。':best==='frog'?'你的画面通常带有雨林生态感与神秘氛围，更注重观察与沉浸体验。':best==='turtle'?'你的生活场景偏稳定、平静与长期主义，整体节奏缓慢且安静。':best==='insect'?'你的场景会带有明显异宠文化风格，强调观察、捕食与冷门收藏感。':'你的画面偏向异宠工作室与生态箱环境，更强调收藏感与养成体验。'}
+</p>
+</div>
+</div>
+
+<h3>推荐原因</h3>
+<p>
+系统根据你的居住环境、时间、预算、互动需求、气味容忍度、异宠接受程度、长期稳定性等多维度综合分析。
+</p>
+
+<h3>饲养建议</h3>
+<p>${r.advice}</p>
+
+<h3>可能也适合你的方向</h3>
+<p>
+猫系用户通常也可能喜欢犬类与鸟类；
+异宠用户则通常也适合龟类、蛙类与生态缸。
+</p>
+
+<h3>不建议的方向</h3>
+<p>
+与当前生活方式冲突较大的高维护、高噪音、高气味宠物。
+</p>
+`;
+
+const shareCard=document.getElementById('shareCard');
+shareCard.style.display='block';
+
+document.getElementById('shareEmoji').innerText = emojis[best];
+document.getElementById('shareTitle').innerText = personalityTitles[best];
+document.getElementById('compatibilityTag').innerText = '宠物适配度 ' + compatibility + '%';
+document.getElementById('shareText').innerText =
+(best==='cat'?'你的理想生活更偏向温暖陪伴与情绪治愈，宠物会成为你生活中的情感核心。':
+best==='dog'?'你更适合充满互动、运动和反馈感的陪伴型生活方式。':
+best==='rodent'?'你偏好轻量、低压力的生活节奏，希望宠物带来轻松陪伴。':
+best==='aquarium'?'你享受生态构建与沉浸式观察，精神世界更加偏理性与安静。':
+best==='bird'?'你渴望交流和回应，喜欢高反馈、高互动的宠物关系。':
+best==='frog'?'你更适合偏神秘生态与沉浸式环境的生活氛围。':
+best==='turtle'?'你更倾向长期主义与稳定陪伴，生活节奏慢而平静。':
+best==='insect'?'你对冷门文化与独特生命形式具有天然探索欲。':'你更适合异宠玩家路线，喜欢观察、养成与生态构建。');
+
+result.scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
